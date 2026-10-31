@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10131c" />
+  <meta name="description" content="RoomWave — simple, clear video calls with anyone." />
+  <title>RoomWave — Video calls, made simple</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="RoomWave home"><span class="brand-mark"><i></i><i></i><i></i></span><span>roomwave</span></a>
+    <div class="top-note"><span class="live-dot"></span> Simple, secure conversations</div>
+  </header>
+
+  <main>
+    <section id="homeView" class="home-view">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span> YOUR SPACE TO CONNECT</div>
+        <h1>Good conversations<br>start <span>face to face.</span></h1>
+        <p class="hero-subtitle">Create a room, invite your people, and make every conversation feel closer. No complicated setup.</p>
+        <div class="trust-row"><span><b class="check">✓</b> Free to use</span><span><b class="check">✓</b> Works on mobile</span><span><b class="check">✓</b> No account needed</span></div>
+      </div>
+
+      <div class="join-card">
+        <div class="card-heading">
+          <div><div class="card-kicker">LET'S GET YOU CONNECTED</div><h2>Start a conversation</h2></div>
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="13" height="12" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="m16 10 5-3v10l-5-3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+        </div>
+        <div class="room-form-section">
+          <div class="section-title">CREATE A ROOM</div>
+          <label for="createName">Your name</label>
+          <input id="createName" type="text" maxlength="32" placeholder="e.g. Alex" autocomplete="name" />
+          <label for="createCode">Room code</label>
+          <input id="createCode" type="text" placeholder="Choose a numeric room code" inputmode="numeric" autocomplete="off" />
+          <button id="createBtn" class="primary-btn"><span class="btn-symbol">＋</span> Create room <span class="arrow">↗</span></button>
+        </div>
+        <div class="separator"><span></span> OR JOIN A ROOM <span></span></div>
+        <div class="room-form-section">
+          <div class="section-title">JOIN A ROOM</div>
+          <label for="joinName">Your name</label>
+          <input id="joinName" type="text" maxlength="32" placeholder="e.g. Jamie" autocomplete="name" />
+          <label for="joinCode">Room code</label>
+          <input id="joinCode" type="text" placeholder="Enter the room code" inputmode="numeric" autocomplete="off" />
+          <button id="joinBtn" class="secondary-btn">Join room <span class="arrow">↗</span></button>
+        </div>
+        <p id="homeError" class="error-text" role="alert"></p>
+        <p class="card-foot"><span class="lock-icon">♢</span> Your browser will ask for camera and microphone access.</p>
+      </div>
+      <div class="hero-bottom"><span>MADE FOR THE MOMENTS THAT MATTER</span><span>ROOMWAVE <b>·</b> VIDEO, TOGETHER</span></div>
+    </section>
+
+    <section id="callView" class="call-view hidden">
+      <div class="call-header">
+        <div><div class="call-brand"><span class="brand-mark small"><i></i><i></i><i></i></span> roomwave</div><div class="call-caption">Your conversation space</div></div>
+        <div class="room-chip"><span class="live-dot"></span><span>ROOM</span><strong id="activeRoomCode">----</strong><button id="copyCodeBtn" title="Copy room code" aria-label="Copy room code">▢</button></div>
+      </div>
+      <div class="call-stage">
+        <div class="stage-top"><div><span class="stage-live"></span> LIVE CALL</div><div id="participantCount">1 participant</div></div>
+        <div id="videoGrid" class="video-grid">
+          <div class="video-tile local-tile" id="localTile">
+            <video id="localVideo" autoplay playsinline muted></video>
+            <div class="video-placeholder" id="localPlaceholder"><div class="avatar">Y</div><span>Camera is off</span></div>
+            <div class="video-label"><span class="you-dot"></span><span id="localName">You</span><em>You</em></div>
+          </div>
+          <div class="waiting-tile" id="waitingTile"><div class="waiting-orbit"><span>✳</span></div><h3>Your room is ready</h3><p>Share the room code to invite someone in.</p><button id="copyInviteBtn" class="invite-btn">Copy room code <span>↗</span></button></div>
+        </div>
+      </div>
+      <div class="call-footer">
+        <div class="call-status" id="callStatus"><span class="status-dot"></span> Waiting for others to join</div>
+        <div class="controls">
+          <button class="control-btn active" id="micBtn" aria-label="Mute microphone" title="Mute microphone"><span class="control-icon" id="micIcon">♩</span><span id="micText">Mute</span></button>
+          <button class="control-btn active" id="cameraBtn" aria-label="Turn camera off" title="Turn camera off"><span class="control-icon">▣</span><span id="cameraText">Stop video</span></button>
+          <button class="leave-btn" id="leaveBtn"><span>↗</span> Leave call</button>
+        </div>
+        <div class="footer-hint">Keep your camera on and enjoy the conversation.</div>
+      </div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
