@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Video Call Demo</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+      }
+      h1 { margin-top: 0; }
+      .videos {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 8px;
+        background: #000;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+      button {
+        padding: 10px 14px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      #status { margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <h1>Web Video Call</h1>
+    <p>This demo creates a browser-based WebRTC video call between two peer connections.</p>
+
+    <section class="videos">
+      <div>
+        <h2>You</h2>
+        <video id="localVideo" autoplay playsinline muted></video>
+      </div>
+      <div>
+        <h2>Remote</h2>
+        <video id="remoteVideo" autoplay playsinline></video>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id="startCall">Start Call</button>
+      <button id="hangup" disabled>Hang Up</button>
+    </div>
+
+    <p id="status">Status: Idle</p>
+
+    <script>
+      const startButton = document.getElementById('startCall');
+      const hangupButton = document.getElementById('hangup');
+      const statusText = document.getElementById('status');
+      const localVideo = document.getElementById('localVideo');
+      const remoteVideo = document.getElementById('remoteVideo');
+
+      let localStream;
+      let caller;
+      let callee;
+
+      const updateStatus = (message) => {
+        statusText.textContent = `Status: ${message}`;
+      };
+
+      const closeConnection = (connection) => {
+        if (connection) {
+          connection.onicecandidate = null;
+          connection.ontrack = null;
+          connection.close();
+        }
+      };
+
+      const resetCall = () => {
+        closeConnection(caller);
+        closeConnection(callee);
+        caller = undefined;
+        callee = undefined;
+
+        if (localStream) {
+          localStream.getTracks().forEach((track) => track.stop());
+          localStream = undefined;
+        }
+
+        localVideo.srcObject = null;
+        remoteVideo.srcObject = null;
+
+        startButton.disabled = false;
+        hangupButton.disabled = true;
+      };
+
+      const wireIce = (a, b) => {
+        a.onicecandidate = async (event) => {
+          if (!event.candidate) {
+            return;
+          }
+
+          try {
+            await b.addIceCandidate(event.candidate);
+          } catch (error) {
+            updateStatus(`ICE error: ${error.message}`);
+          }
+        };
+      };
+
+      const startCall = async () => {
+        startButton.disabled = true;
+        updateStatus('Requesting camera and microphone access...');
+
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true,
+          });
+        } catch (error) {
+          updateStatus(`Unable to access media devices: ${error.message}`);
+          startButton.disabled = false;
+          return;
+        }
+
+        localVideo.srcObject = localStream;
+
+        caller = new RTCPeerConnection();
+        callee = new RTCPeerConnection();
+
+        wireIce(caller, callee);
+        wireIce(callee, caller);
+
+        callee.ontrack = (event) => {
+          if (!remoteVideo.srcObject) {
+            remoteVideo.srcObject = event.streams[0];
+          }
+        };
+
+        localStream.getTracks().forEach((track) => caller.addTrack(track, localStream));
+
+        try {
+          const offer = await caller.createOffer();
+          await caller.setLocalDescription(offer);
+          await callee.setRemoteDescription(offer);
+
+          const answer = await callee.createAnswer();
+          await callee.setLocalDescription(answer);
+          await caller.setRemoteDescription(answer);
+
+          updateStatus('In call');
+          hangupButton.disabled = false;
+        } catch (error) {
+          updateStatus(`Failed to start call: ${error.message}`);
+          resetCall();
+        }
+      };
+
+      startButton.addEventListener('click', startCall);
+      hangupButton.addEventListener('click', () => {
+        resetCall();
+        updateStatus('Call ended');
+      });
+    </script>
+  </body>
+</html>
